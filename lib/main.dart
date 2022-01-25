@@ -3,6 +3,7 @@
 
 import 'dart:convert';
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
@@ -35,6 +36,7 @@ class MyApp extends StatelessWidget {
       home: MyHomePage(
         title: 'Flutter Demo Home Page',
         word: "",
+        imageUrl: "",
       ),
     );
   }
@@ -45,6 +47,7 @@ class MyHomePage extends StatefulWidget {
     Key? key,
     required this.title,
     required this.word,
+    required this.imageUrl,
   }) : super(key: key);
 
   // This widget is the home page of your application. It is stateful, meaning
@@ -57,7 +60,7 @@ class MyHomePage extends StatefulWidget {
   // always marked "final".
 
   final String title;
-  var imageUrl = Image.asset('assets/loading-blue.gif');
+  String imageUrl;
   String word;
 
   @override
@@ -77,9 +80,9 @@ class _MyHomePageState extends State<MyHomePage>
           "validate": "true",
           "text": text,
           "size": "150",
-          "type": "svg",
+          "type": "png",
           "labelalign": "center",
-          "forecolor": "000000",
+          "forecolor": color,
           "backcolor": "FFFFFF",
           "level": "M"
         }),
@@ -91,9 +94,13 @@ class _MyHomePageState extends State<MyHomePage>
           'Content-Type': 'application/json',
           'Charset': 'utf-8'
         });
-    print(jsonDecode(response.body.toString()));
+    var extractedData = jsonEncode(response.body);
+    List<int> imagebytes = response.bodyBytes;
+    print(imagebytes);
+    String base64Image = base64Encode(imagebytes);
+
     setState(() {
-      widget.imageUrl = response.body as Image;
+      widget.imageUrl = base64Image;
     });
   }
 
@@ -119,6 +126,8 @@ class _MyHomePageState extends State<MyHomePage>
 
   @override
   Widget build(BuildContext context) {
+    final Uint8List _bytesImage;
+    _bytesImage = const Base64Decoder().convert(widget.imageUrl);
     // This method is rerun every time setState is called, for instance as done
     // by the _incrementCounter method above.
     //
@@ -164,24 +173,24 @@ class _MyHomePageState extends State<MyHomePage>
                         child: Image.asset('assets/frame.png'),
                       ),
                     ),
-                    // widget.imageUrl != null
-                    //     ? Center(
-                    //         child: Container(
-                    //           padding: const EdgeInsets.only(top: 10),
-                    //           height: 190,
-                    //           width: 190,
-                    //           child: widget.imageUrl,
-                    //         ),
-                    //       )
-                    Positioned(
-                      top: 90.0,
-                      left: 90.0,
-                      child: Container(
-                        height: 190,
-                        width: 190,
-                        child: widget.imageUrl,
-                      ),
-                    ),
+                    widget.imageUrl != ""
+                        ? Center(
+                            child: Container(
+                              padding: const EdgeInsets.only(top: 10),
+                              height: 190,
+                              width: 190,
+                              child: Image.memory(_bytesImage),
+                            ),
+                          )
+                        : Positioned(
+                            top: 90.0,
+                            left: 90.0,
+                            child: Container(
+                              height: 190,
+                              width: 190,
+                              child: Image.asset("assets/loading.gif"),
+                            ),
+                          ),
                   ],
                 ),
                 const SizedBox(
