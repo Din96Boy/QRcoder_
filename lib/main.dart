@@ -83,7 +83,7 @@ class _MyHomePageState extends State<MyHomePage>
           "type": "png",
           "labelalign": "center",
           "forecolor": color,
-          "backcolor": "FFFFFF",
+          "backcolor": "00247C",
           "level": "M"
         }),
         headers: {
@@ -174,12 +174,16 @@ class _MyHomePageState extends State<MyHomePage>
                       ),
                     ),
                     widget.imageUrl != ""
-                        ? Center(
-                            child: Container(
-                              padding: const EdgeInsets.only(top: 10),
-                              height: 190,
-                              width: 190,
-                              child: Image.memory(_bytesImage),
+                        ? Positioned(
+                            top: 90.0,
+                            left: 90.0,
+                            child: Center(
+                              child: Container(
+                                padding: const EdgeInsets.only(top: 10),
+                                height: 190,
+                                width: 190,
+                                child: Image.memory(_bytesImage),
+                              ),
                             ),
                           )
                         : Positioned(
