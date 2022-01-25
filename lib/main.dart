@@ -1,5 +1,4 @@
 //clereignore: avoid_web_libraries_in_flutter
-// import 'dart:html';
 
 import 'dart:convert';
 import 'dart:async';
@@ -35,17 +34,19 @@ class MyApp extends StatelessWidget {
       home: MyHomePage(
         title: 'Flutter Demo Home Page',
         word: "",
+        imageUrl: "",
       ),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({
-    Key? key,
-    required this.title,
-    required this.word,
-  }) : super(key: key);
+  MyHomePage(
+      {Key? key,
+      required this.title,
+      required this.word,
+      required this.imageUrl})
+      : super(key: key);
 
   // This widget is the home page of your application. It is stateful, meaning
   // that it has a State object (defined below) that contains fields that affect
@@ -57,7 +58,7 @@ class MyHomePage extends StatefulWidget {
   // always marked "final".
 
   final String title;
-  var imageUrl = Image.asset('assets/loading-blue.gif');
+  String imageUrl;
   String word;
 
   @override
@@ -71,29 +72,31 @@ class _MyHomePageState extends State<MyHomePage>
   late AnimationController _animationController;
 
   Future<void> createQrCode(String text, String color) async {
-    var uri = Uri.parse("https://qrcodeutils.p.rapidapi.com/qrcodepro");
+    var uri = Uri.parse("https://qr-code-generator19.p.rapidapi.com/generator");
     var response = await http.get(
         uri.replace(queryParameters: <String, String>{
-          "validate": "true",
           "text": text,
-          "size": "150",
-          "type": "svg",
-          "labelalign": "center",
-          "forecolor": "000000",
-          "backcolor": "FFFFFF",
-          "level": "M"
+          "width": "500",
+          "margin": "1"
         }),
         headers: {
-          "x-rapidapi-host": "qrcodeutils.p.rapidapi.com",
+          "x-rapidapi-host": "qr-code-generator19.p.rapidapi.com",
           "x-rapidapi-key":
               "a294c930cdmsh1384aac4ce21903p139813jsn6a775005400e",
           "useQueryString": "true",
           'Content-Type': 'application/json',
           'Charset': 'utf-8'
         });
-    print(jsonDecode(response.body.toString()));
+
+    final extractedData = jsonDecode(response.body) as Map<String, dynamic>;
+    final imageData = jsonDecode(extractedData['qr_code']
+        .toString()
+        .replaceAll("data:image/png;base64,", ""));
+
+    print(imageData);
+
     setState(() {
-      widget.imageUrl = response.body as Image;
+      widget.imageUrl = imageData;
     });
   }
 
@@ -164,24 +167,22 @@ class _MyHomePageState extends State<MyHomePage>
                         child: Image.asset('assets/frame.png'),
                       ),
                     ),
-                    // widget.imageUrl != null
-                    //     ? Center(
-                    //         child: Container(
-                    //           padding: const EdgeInsets.only(top: 10),
-                    //           height: 190,
-                    //           width: 190,
-                    //           child: widget.imageUrl,
-                    //         ),
-                    //       )
-                    Positioned(
-                      top: 90.0,
-                      left: 90.0,
-                      child: Container(
-                        height: 190,
-                        width: 190,
-                        child: widget.imageUrl,
-                      ),
-                    ),
+                    widget.imageUrl != ""
+                        ? Center(
+                            child: Container(
+                              padding: const EdgeInsets.only(top: 10),
+                              height: 190,
+                              width: 190,
+                              child: Image.asset(widget.imageUrl),
+                            ),
+                          )
+                        : Center(
+                            child: Container(
+                              height: 190,
+                              width: 190,
+                              child: Image.asset('assets/loading-blue.gif'),
+                            ),
+                          ),
                   ],
                 ),
                 const SizedBox(
